@@ -1,20 +1,6 @@
 import https from 'https';
 import fs from 'fs';
 import { type IncomingMessage, type ServerResponse } from 'http';
-import { Fido2Lib } from 'fido2-lib';
-
-const f2l = new Fido2Lib({
-  timeout: 42,
-  rpId: "example.com",
-  rpName: "ACME",
-  rpIcon: "https://example.com/logo.png",
-  challengeSize: 128,
-  attestation: "none",
-  cryptoParams: [-7, -257],
-  authenticatorAttachment: "platform",
-  authenticatorRequireResidentKey: false,
-  authenticatorUserVerification: "required"
-});
 
 const options = {
   key: fs.readFileSync('key.pem'),
