@@ -632,6 +632,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/webappsec-credential-management@npm:^0.6.8":
+  version: 0.6.8
+  resolution: "@types/webappsec-credential-management@npm:0.6.8"
+  checksum: 10c0/be7d6a80b8e113e9128ef75c8b0a03ea6762b5d83bc57dd0bfb353991afefffe38c7639ee863fdc2cca0df7d6ff08ab085b95876bec3f4873848851f269f279e
+  languageName: node
+  linkType: hard
+
 "abbrev@npm:^2.0.0":
   version: 2.0.0
   resolution: "abbrev@npm:2.0.0"
@@ -753,6 +760,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "client@workspace:packages/client"
   dependencies:
+    "@types/webappsec-credential-management": "npm:^0.6.8"
     lit: "npm:^3.2.0"
     typescript: "npm:^5.5.3"
     vite: "npm:^5.4.1"
