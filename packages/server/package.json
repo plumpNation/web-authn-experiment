@@ -4,7 +4,7 @@
     "config": "mkcert -install",
     "create:cert": "mkcert -key-file key.pem -cert-file cert.pem localhost",
     "start": "tsx src/index.mts",
-    "start:v": "tsx src/vanilla.mts"
+    "start:v": "tsx watch src/vanilla.mts"
   },
   "devDependencies": {
     "@simplewebauthn/types": "^10.0.0",
