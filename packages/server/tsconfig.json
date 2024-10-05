@@ -1,3 +1,11 @@
 {
-    "extends": "@tsconfig/node20/tsconfig.json"
+    "extends": "@tsconfig/node20/tsconfig.json",
+    "compilerOptions": {
+        "allowImportingTsExtensions": true,
+        "noEmit": true,
+        "allowSyntheticDefaultImports": true,
+        "paths": {
+            "shared/*": ["../shared/*"]
+        }
+    },
 }
