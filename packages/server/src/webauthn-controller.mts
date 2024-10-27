@@ -1,21 +1,28 @@
 import { type Request, type Response } from 'express';
 import crypto from 'crypto';
 
+import type {
+  RegistrationDto,
+  PostRegistrationDto,
+  PostAuthenticationDto,
+  PostVerifyRegistrationDto,
+  PostVerifyAuthenticationDto,
+} from 'shared/dtos.mts';
+
 // Temporary storage for challenges and user data
+// todo replace with a real database
 const challenges: { [key: string]: string } = {};
 const users: { [key: string]: any } = {};
 
-// Helper function to generate a random challenge
-const generateChallenge = () => {
-  return crypto.randomBytes(32).toString('base64');
-};
+const generateChallenge = () => crypto.randomBytes(32).toString('base64');
 
-// Registration endpoint
-export const startRegistration = (req: Request, res: Response) => {
-  console.log("startRegistration");
-
+export const startRegistration = (
+  req: Request<{}, null, PostRegistrationDto>,
+  res: Response<RegistrationDto>,
+) => {
   const { username } = req.body;
   const challenge = generateChallenge();
+
   challenges[username] = challenge;
 
   res.json({
@@ -26,27 +33,41 @@ export const startRegistration = (req: Request, res: Response) => {
       name: username,
       displayName: username
     },
-    pubKeyCredParams: [{ type: "public-key", alg: -7 }]
+    pubKeyCredParams: [{
+      type: "public-key",
+      alg: -7,
+    }],
   });
 };
 
-// Registration verification endpoint
-export const verifyRegistration = (req: Request, res: Response) => {
+export const verifyRegistration = (
+  req: Request<{}, null, PostVerifyRegistrationDto>,
+  res: Response<{ ok: boolean, error?: string }>,
+) => {
   const { username, attestationObject, clientDataJSON } = req.body;
   const challenge = challenges[username];
 
   // Verify the challenge and attestation here (simplified)
   if (challenge && attestationObject && clientDataJSON) {
     users[username] = { attestationObject, clientDataJSON };
+
     delete challenges[username];
-    res.json({ status: 'ok' });
-  } else {
-    res.status(400).json({ error: 'Invalid registration' });
+
+    res.json({ ok: true });
+
+    return;
   }
+
+  res.status(400).json({
+    ok: false,
+    error: 'Invalid registration',
+  });
 };
 
-// Authentication endpoint
-export const startAuthentication = (req: Request, res: Response) => {
+export const startAuthentication = (
+  req: Request<{}, null, PostAuthenticationDto>,
+  res: Response,
+) => {
   const { username } = req.body;
   const challenge = generateChallenge();
   challenges[username] = challenge;
@@ -60,16 +81,24 @@ export const startAuthentication = (req: Request, res: Response) => {
   });
 };
 
-// Authentication verification endpoint
-export const verifyAuthentication = (req: Request, res: Response) => {
+export const verifyAuthentication = (
+  req: Request<{}, null, PostVerifyAuthenticationDto>,
+  res: Response<{ ok: boolean, error?: string }>,
+) => {
   const { username, authenticatorData, clientDataJSON, signature } = req.body;
   const challenge = challenges[username];
 
   // Verify the challenge and signature here (simplified)
   if (challenge && authenticatorData && clientDataJSON && signature) {
     delete challenges[username];
-    res.json({ status: 'ok' });
-  } else {
-    res.status(400).json({ error: 'Invalid authentication' });
+
+    res.json({ ok: true });
+
+    return;
   }
+
+  res.status(400).json({
+    ok: false,
+    error: 'Invalid authentication',
+  });
 };

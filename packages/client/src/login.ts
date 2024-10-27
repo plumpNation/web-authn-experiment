@@ -1,18 +1,21 @@
+import type { AuthenticationDto } from "shared/dtos";
+
+const postLogin = async (username: string): Promise<AuthenticationDto> =>
+  await fetch('/api/webauthn/authenticate', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ username })
+  })
+  .then((response) => response.json());
+
 document.getElementById('login-form')?.addEventListener('submit', async (event) => {
     event.preventDefault();
     const username = (document.getElementById('username') as HTMLInputElement).value;
+    const challengeDto = await postLogin(username);
 
-    const response = await fetch('/api/webauthn/authenticate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ username })
-    });
-
-    const challengeDto = await response.json();
-
-    const publicKeyCredential = await navigator.credentials.get({
+    const publicKeyCredential = (await navigator.credentials.get({
       publicKey: {
         ...challengeDto,
         challenge: Uint8Array.from(atob(challengeDto.challenge), c => c.charCodeAt(0)),
@@ -21,11 +24,19 @@ document.getElementById('login-form')?.addEventListener('submit', async (event) 
           id: Uint8Array.from(atob(cred.id), c => c.charCodeAt(0))
         }))
       }
-    });
+    }) as PublicKeyCredential | null);
 
-    const authenticatorData = publicKeyCredential?.response.authenticatorData;
-    const clientDataJSON = publicKeyCredential?.response.clientDataJSON;
-    const signature = publicKeyCredential?.response.signature;
+    const publicKey = publicKeyCredential?.response as AuthenticatorAssertionResponse;
+
+    if (!publicKey) {
+      throw new Error('Public key generation failed');
+    }
+
+    const {
+      authenticatorData,
+      clientDataJSON,
+      signature,
+    } = publicKey;
 
     await fetch('/api/webauthn/authenticate/verify', {
       method: 'POST',
