@@ -12,6 +12,8 @@ const generateChallenge = () => {
 
 // Registration endpoint
 export const startRegistration = (req: Request, res: Response) => {
+  console.log("startRegistration");
+
   const { username } = req.body;
   const challenge = generateChallenge();
   challenges[username] = challenge;

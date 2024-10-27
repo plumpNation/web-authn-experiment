@@ -9,7 +9,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const certDir = path.resolve(path.join(__dirname, '..', 'certs'));
+const certDir = path.resolve(path.join(__dirname, 'certs'));
 const keyPath = `${certDir}/key.pem`;
 const certPath = `${certDir}/cert.pem`;
 
@@ -18,8 +18,6 @@ if (!fs.existsSync(keyPath) || !fs.existsSync(certPath)) {
     `key.pem and cert.pem files are required to run the server.
     Looked in ${certDir} directory for ${keyPath} and ${certPath} files.`
   );
-
-  throw new Error('Missing key.pem and cert.pem files');
 
   process.exit(1);
 }

@@ -23,5 +23,5 @@
       "shared/*": ["../shared/*"],
     }
   },
-  "include": ["src", "../shared/base64url.ts"]
+  "include": ["src"],
 }
