@@ -1,4 +1,8 @@
-import { RegistrationDto } from "shared/dtos";
+import type { PostRegistrationDto, RegistrationDto } from "shared/dtos.mjs";
+
+const headers = {
+  'Content-Type': 'application/json',
+};
 
 const postVerification = async (
   username: string,
@@ -9,9 +13,7 @@ const postVerification = async (
 ) =>
   await fetch('/api/webauthn/register/verify', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: JSON.stringify({
       username,
       attestationObject: btoa(String.fromCharCode(...new Uint8Array(attestationObject))),
@@ -19,23 +21,25 @@ const postVerification = async (
     })
   });
 
-const postRegistration = async (username: string): Promise<RegistrationDto> =>
+const postRegistration = async (body: PostRegistrationDto): Promise<RegistrationDto> =>
   await fetch('/api/webauthn/register', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ username })
+    headers,
+    body: JSON.stringify(body)
   }).then((response) => response.json());
 
-const createCredential = async (challengeDto: RegistrationDto) => {
+const createPublicKey = async (challengeDto: RegistrationDto) => {
+  debugger;
+  const decodedChallenge = atob(challengeDto.challenge);
+  const decodedUserId = atob(challengeDto.user.id);
+
   const publicKeyCredential = (await navigator.credentials.create({
     publicKey: {
       ...challengeDto,
-      challenge: Uint8Array.from(atob(challengeDto.challenge), c => c.charCodeAt(0)),
+      challenge: Uint8Array.from(decodedChallenge, c => c.charCodeAt(0)),
       user: {
         ...challengeDto.user,
-        id: Uint8Array.from(atob(challengeDto.user.id), c => c.charCodeAt(0))
+        id: Uint8Array.from(decodedUserId, c => c.charCodeAt(0))
       }
     }
   }) as PublicKeyCredential | null);
@@ -53,9 +57,8 @@ document.getElementById('register-form')?.addEventListener('submit', async (even
   event.preventDefault();
 
   const username = (document.getElementById('username') as HTMLInputElement).value;
-  const challengeDto = await postRegistration(username);
+  const challengeDto = await postRegistration({ username });
+  const publicKeyCredential = await createPublicKey(challengeDto);
 
-  const publicKeyCredential =
-
-  postVerification(username, publicKey);
+  postVerification(username, publicKeyCredential);
 });

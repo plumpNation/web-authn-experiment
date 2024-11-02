@@ -7,12 +7,16 @@ import type {
   PostAuthenticationDto,
   PostVerifyRegistrationDto,
   PostVerifyAuthenticationDto,
+  UserDto,
 } from 'shared/dtos.mts';
 
 // Temporary storage for challenges and user data
 // todo replace with a real database
 const challenges: { [key: string]: string } = {};
-const users: { [key: string]: any } = {};
+const users: { [key: string]: {
+  clientDataJSON: string,
+  attestationObject: string,
+} } = {};
 
 const generateChallenge = () => crypto.randomBytes(32).toString('base64');
 
