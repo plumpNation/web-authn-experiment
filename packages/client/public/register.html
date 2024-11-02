@@ -1,17 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register</title>
-</head>
-<body>
-  <h1>Register</h1>
-  <form id="register-form">
-    <label for="username">Username:</label>
-    <input type="text" id="username" name="username" required>
-    <button type="submit">Register</button>
-  </form>
-  <script src="/src/register.ts"></script>
-</body>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <script type="module" src="/src/components/main-nav.ts"></script>
+  </head>
+
+  <body>
+    <main-nav></main-nav>
+
+    <h1>Register</h1>
+
+    <form id="register-form">
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" required>
+      <button type="submit">Register</button>
+    </form>
+
+    <script src="/src/register.ts"></script>
+  </body>
 </html>

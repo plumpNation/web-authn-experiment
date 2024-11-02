@@ -1,14 +1,15 @@
 import { type Request, type Response } from 'express';
-import crypto from 'crypto';
 
 import type {
-  RegistrationDto,
   PostRegistrationDto,
   PostAuthenticationDto,
   PostVerifyRegistrationDto,
   PostVerifyAuthenticationDto,
-  UserDto,
+  PublicKeyRegistrationDto,
 } from 'shared/dtos.mts';
+
+import { Attestation } from './Attestation.mts';
+import { createPublicKeyRegistrationDto, generateChallenge } from './webauth.helpers.mts';
 
 // Temporary storage for challenges and user data
 // todo replace with a real database
@@ -18,54 +19,51 @@ const users: { [key: string]: {
   attestationObject: string,
 } } = {};
 
-const generateChallenge = () => crypto.randomBytes(32).toString('base64');
+const expectedRPID = 'Example Corp';
+const expectedOrigin = 'localhost';
 
 export const startRegistration = (
   req: Request<{}, null, PostRegistrationDto>,
-  res: Response<RegistrationDto>,
+  res: Response<PublicKeyRegistrationDto>,
 ) => {
   const { username } = req.body;
   const challenge = generateChallenge();
 
+  // The challenge for a user is overwritten, meaning
+  // only one challenge can be active at a time.
   challenges[username] = challenge;
 
-  res.json({
-    challenge,
-    rp: { name: "Example Corp" },
-    user: {
-      id: Buffer.from(username).toString('base64'),
-      name: username,
-      displayName: username
-    },
-    pubKeyCredParams: [{
-      type: "public-key",
-      alg: -7,
-    }],
-  });
+  res.json(createPublicKeyRegistrationDto(username, challenge, expectedRPID));
 };
 
-export const verifyRegistration = (
+export const verifyRegistration = async (
   req: Request<{}, null, PostVerifyRegistrationDto>,
   res: Response<{ ok: boolean, error?: string }>,
 ) => {
-  const { username, attestationObject, clientDataJSON } = req.body;
-  const challenge = challenges[username];
+  const { username } = req.body;
+  const expectedChallenge = challenges[username];
 
-  // Verify the challenge and attestation here (simplified)
-  if (challenge && attestationObject && clientDataJSON) {
-    users[username] = { attestationObject, clientDataJSON };
-
-    delete challenges[username];
-
-    res.json({ ok: true });
-
-    return;
+  if (!expectedChallenge) {
+    throw new Error('No challenge found for user');
   }
 
-  res.status(400).json({
-    ok: false,
-    error: 'Invalid registration',
-  });
+  const attestation = new Attestation(
+    req.body,
+    {
+      fmt: 'packed',
+      rpid: expectedRPID,
+      origin: expectedOrigin,
+      challenge: expectedChallenge,
+    },
+  );
+
+  if (!attestation.isVerified()) {
+      throw new Error("Signature verification failed.");
+  }
+
+  delete challenges[username];
+
+  res.json({ ok: true });
 };
 
 export const startAuthentication = (

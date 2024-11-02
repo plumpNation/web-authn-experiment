@@ -1,3 +1,5 @@
+import { ES256 } from "./attestation-object.types.mts";
+
 export type UserDto = {
   id: string;
   name: string;
@@ -21,7 +23,7 @@ export type PostVerifyRegistrationDto = {
   clientDataJSON: string;
 };
 
-export type RegistrationDto = {
+export type PublicKeyRegistrationDto = {
   challenge: string;
   rp: {
     name: string;
@@ -31,7 +33,7 @@ export type RegistrationDto = {
     name: string;
     displayName: string;
   };
-  pubKeyCredParams: { type: "public-key", alg: -7 }[]
+  pubKeyCredParams: { type: "public-key", alg: ES256 }[]
 };
 
 export type PostVerifyAuthenticationDto = {
